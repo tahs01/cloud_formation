@@ -1,0 +1,240 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: 'public subnet in us-east-2 default VPC'
+Resources:
+  defaultVPC:                                              #Default VPC
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: 'default'
+      # Ipv4IpamPoolId: String
+      # Ipv4NetmaskLength: Integer
+      Tags:
+      - Key: 'Name'
+        Value: 'Default VPC'
+      - Key: 'Region'
+        Value: 'Ohio'
+  internetGateway:                                        #Internet Gateway for VPC
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: 'Name'
+        Value: 'InternetGateway for Default VPC'
+  igwAttachtoDefaultVPC:                                  #Internet Gateway attached to VPC
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref internetGateway
+      VpcId: !Ref defaultVPC
+      #VpnGatewayId: String
+  publicSubnet1:                                          #Public Subnet 1 for Default VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: 'us-east-2a'
+      # AvailabilityZoneId: String
+      CidrBlock: '10.0.1.0/24'
+      # EnableDns64: Boolean
+      # Ipv6CidrBlock: String
+      # Ipv6Native: Boolean
+      MapPublicIpOnLaunch: true
+      # OutpostArn: String
+      #PrivateDnsNameOptionsOnLaunch: 
+      Tags:
+      - Key: 'Name'
+        Value: 'public subnet 1 for default vpc'
+      VpcId: !Ref defaultVPC
+  routeTableforPublicSubnet1:                            #Route Table for Public Subnet 1
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: 'Name'
+          Value: 'Route Table for Public Subnet 1'
+      VpcId: !Ref defaultVPC
+  publicSubnet1RouteTabelAssociation:                    #Route Table Association for Public Subnet 1
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref routeTableforPublicSubnet1
+      SubnetId: !Ref publicSubnet1
+  routeTable1toIGW:                                      ##Routing to Internet Acrossing the IGW
+    Type: AWS::EC2::Route
+    Properties:
+      #CarrierGatewayId: String
+      DestinationCidrBlock: '0.0.0.0/0'
+      # DestinationIpv6CidrBlock: String
+      #EgressOnlyInternetGatewayId: String
+      GatewayId: !Ref internetGateway
+      # InstanceId: String
+      # LocalGatewayId: String
+      # NatGatewayId: String
+      # NetworkInterfaceId: String
+      RouteTableId: !Ref routeTableforPublicSubnet1
+      # TransitGatewayId: String
+      # VpcEndpointId: String
+      # VpcPeeringConnectionId: String
+  publicSubnet2:                                          #Public Subnet 1 for Default VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: 'us-east-2b'
+      # AvailabilityZoneId: String
+      CidrBlock: '10.0.2.0/24'
+      # EnableDns64: Boolean
+      # Ipv6CidrBlock: String
+      # Ipv6Native: Boolean
+      MapPublicIpOnLaunch: true
+      # OutpostArn: String
+      # PrivateDnsNameOptionsOnLaunch: 
+      Tags:
+      - Key: 'Name'
+        Value: 'public subnet2 for default vpc'
+      VpcId: !Ref defaultVPC
+  routeTableforPublicSubnet2:                             #Route Table for Public Subnet 2
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: 'Name'
+          Value: 'Route Table for Public Subnet 2'
+      VpcId: !Ref defaultVPC
+  publicSubnet2RouteTabelAssociation:                     #Route Table Association for Public Subnet 2
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref routeTableforPublicSubnet2
+      SubnetId: !Ref publicSubnet2
+  routeTable2toIGW:                                       #Routing to Internet Acrossing the IGW
+    Type: AWS::EC2::Route
+    Properties:
+      #CarrierGatewayId: String
+      DestinationCidrBlock: '0.0.0.0/0'
+      # DestinationIpv6CidrBlock: String
+      #EgressOnlyInternetGatewayId: String
+      GatewayId: !Ref internetGateway
+      # InstanceId: String
+      # LocalGatewayId: String
+      # NatGatewayId: String
+      # NetworkInterfaceId: String
+      RouteTableId: !Ref routeTableforPublicSubnet2
+      # TransitGatewayId: String
+      # VpcEndpointId: String
+      # VpcPeeringConnectionId: String
+  natGatewayEIP1:                                            #Elastic IP for NAT Gateway for Public Subnet1
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: 'vpc'
+      # InstanceId: String
+      # NetworkBorderGroup: String
+      # PublicIpv4Pool: String
+      Tags:
+        - Key: 'Name'
+          Value: 'NAT Gateway EIP1'
+      # TransferAddress: String
+  natGatewayforPublicSubnet1:                                #NAT Gateway for public 1
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt natGatewayEIP1.AllocationId      #!GetAtt logicalNameOfResource.attributeName
+      ConnectivityType: 'public'
+      # MaxDrainDurationSeconds: Integer
+      #  PrivateIpAddress: String
+      #  SecondaryAllocationIds: 
+      #    - String
+      # SecondaryPrivateIpAddressCount: Integer
+      #  SecondaryPrivateIpAddresses: 
+      #    - String
+      SubnetId: !Ref publicSubnet1
+      Tags:
+        - Key: 'Name'
+          Value: 'NAT Gateway for Public Subnet 1'
+  privateSubnet1:                                          #Private Subnet 1 for Default VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: 'us-east-2a'
+      # AvailabilityZoneId: String
+      CidrBlock: '10.0.1.0/24'
+      # EnableDns64: Boolean
+      # Ipv6CidrBlock: String
+      # Ipv6Native: Boolean
+      MapPublicIpOnLaunch: false
+      # OutpostArn: String
+      #PrivateDnsNameOptionsOnLaunch: 
+      Tags:
+      - Key: 'Name'
+        Value: 'private subnet 1 for default vpc'
+      - Key: 'Region'
+        Value: 'Ohio'
+      VpcId: !Ref defaultVPC
+  routeTableforPrivateSubnet1:                            #Route Table for Private Subnet 1
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: 'Name'
+          Value: 'Route Table for Private Subnet 1'
+      VpcId: !Ref defaultVPC
+  privateSubnet1RouteTabelAssociation:                    #Route Table Association for Private Subnet 1
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref routeTableforPrivateSubnet1
+      SubnetId: !Ref privateSubnet1
+  routeTable1toNATGW:                                     #Routing to Internet Acrossing NATGW
+    Type: AWS::EC2::Route
+    Properties:
+      #CarrierGatewayId: String
+      DestinationCidrBlock: '0.0.0.0/0'
+      # DestinationIpv6CidrBlock: String
+      #EgressOnlyInternetGatewayId: String
+      GatewayId: !Ref natGatewayforPublicSubnet1
+      # InstanceId: String
+      # LocalGatewayId: String
+      # NatGatewayId: String
+      # NetworkInterfaceId: String
+      RouteTableId: !Ref routeTableforPrivateSubnet1
+      # TransitGatewayId: String
+      # VpcEndpointId: String
+      # VpcPeeringConnectionId: String
+  privateSubnet2:                                          #Private Subnet 1 for Default VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: 'us-east-2b'
+      # AvailabilityZoneId: String
+      CidrBlock: '10.0.2.0/24'
+      # EnableDns64: Boolean
+      # Ipv6CidrBlock: String
+      # Ipv6Native: Boolean
+      MapPublicIpOnLaunch: false
+      # OutpostArn: String
+      # PrivateDnsNameOptionsOnLaunch: 
+      Tags:
+      - Key: 'Name'
+        Value: 'private subnet2 for default vpc'
+      - Key: 'Region'
+        Value: 'Ohio'
+      VpcId: !Ref defaultVPC
+  routeTableforPrivateSubnet2:                             #Route Table for Private Subnet 2
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: 'Name'
+          Value: 'Route Table for Private Subnet 2'
+      VpcId: !Ref defaultVPC
+  privateSubnet2RouteTabelAssociation:                     #Route Table Association for Private Subnet 2
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref routeTableforPrivateSubnet2
+      SubnetId: !Ref privateSubnet2
+  routeTable2toNATGW:                                       #Routing to Internet Acrossing NATGW
+    Type: AWS::EC2::Route
+    Properties:
+      #CarrierGatewayId: String
+      DestinationCidrBlock: '0.0.0.0/0'
+      # DestinationIpv6CidrBlock: String
+      #EgressOnlyInternetGatewayId: String
+      GatewayId: !Ref natGatewayforPublicSubnet1
+      # InstanceId: String
+      # LocalGatewayId: String
+      # NatGatewayId: String
+      # NetworkInterfaceId: String
+      RouteTableId: !Ref routeTableforPrivateSubnet2
+      # TransitGatewayId: String
+      # VpcEndpointId: String
+      # VpcPeeringConnectionId: String
