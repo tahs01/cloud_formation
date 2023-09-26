@@ -37,7 +37,7 @@ Resources:
       # EnableDns64: Boolean
       # Ipv6CidrBlock: String
       # Ipv6Native: Boolean
-      MapPublicIpOnLaunch: false
+      MapPublicIpOnLaunch: true
       # OutpostArn: String
       #PrivateDnsNameOptionsOnLaunch: 
       Tags: 
@@ -82,7 +82,7 @@ Resources:
       # EnableDns64: Boolean
       # Ipv6CidrBlock: String
       # Ipv6Native: Boolean
-      MapPublicIpOnLaunch: false
+      MapPublicIpOnLaunch: true
       # OutpostArn: String
       # PrivateDnsNameOptionsOnLaunch: 
       Tags: 
