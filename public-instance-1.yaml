@@ -1,0 +1,15 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  awsKeypair1:                         #Logical ID
+    Type: AWS::EC2::KeyPair            #ceating key pair
+    Properties:
+      KeyFormat: 'pem'
+      KeyName: 'tahs-key-01'
+      KeyType: 'rsa'
+  publicInstance1:                     #Logical ID
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: 'ami-02a89066c48741345' #Amazon Linux 2023 AMI
+      InstanceType : 't2.micro'
+      KeyName : !Ref awsKeypair1       #attched with logical ID
+

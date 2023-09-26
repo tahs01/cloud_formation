@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: 'private subnet in us-east-2 default VPC'
+Resources:
+  defaultVPC:                                              #Default VPC
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: 'default'
+      # Ipv4IpamPoolId: String
+      # Ipv4NetmaskLength: Integer
+      Tags: 
+      - Key: 'Name'
+        Value: 'Default VPC'
+      - Key: 'Region'
+        Value: 'Ohio' 
+  privateSubnet1:                                          #Private Subnet 1 for Default VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: 'us-east-2a'
+      # AvailabilityZoneId: String
+      CidrBlock: '10.0.1.0/24'
+      # EnableDns64: Boolean
+      # Ipv6CidrBlock: String
+      # Ipv6Native: Boolean
+      MapPublicIpOnLaunch: false
+      # OutpostArn: String
+      #PrivateDnsNameOptionsOnLaunch: 
+      Tags: 
+      - Key: 'Name'
+        Value: 'private subnet 1 for default vpc'
+      - Key: 'Region'
+        Value: 'Ohio'      
+      VpcId: !Ref defaultVPC
+  routeTableforPrivateSubnet1:                            #Route Table for Private Subnet 1
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: 'Name'
+          Value: 'Route Table for Private Subnet 1'
+      VpcId: !Ref defaultVPC
+  privateSubnet1RouteTabelAssociation:                    #Route Table Association for Private Subnet 1
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableforPrivateSubnet1
+      SubnetId: !Ref privateSubnet1  
+  privateSubnet2:                                          #Private Subnet 1 for Default VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      # AssignIpv6AddressOnCreation: Boolean
+      AvailabilityZone: 'us-east-2b'
+      # AvailabilityZoneId: String
+      CidrBlock: '10.0.2.0/24'
+      # EnableDns64: Boolean
+      # Ipv6CidrBlock: String
+      # Ipv6Native: Boolean
+      MapPublicIpOnLaunch: false
+      # OutpostArn: String
+      # PrivateDnsNameOptionsOnLaunch: 
+      Tags: 
+      - Key: 'Name'
+        Value: 'private subnet2 for default vpc'
+      - Key: 'Region'
+        Value: 'Ohio'      
+      VpcId: !Ref defaultVPC
+  routeTableforPrivateSubnet2:                             #Route Table for Private Subnet 2
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: 'Name'
+          Value: 'Route Table for Private Subnet 2'
+      VpcId: !Ref defaultVPC
+  privateSubnet2RouteTabelAssociation:                     #Route Table Association for Private Subnet 2
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableforPrivateSubnet2
+      SubnetId: !Ref privateSubnet2
